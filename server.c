@@ -2,25 +2,30 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
-#include <sys/un.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <unistd.h>
+//#include <sys/un.h>
 
+//#define SOCK_PATH "/path" 
 #define BUFFSIZE 1024
-#define SOCK_PATH "/path" // following man - idk what the path is.
-#define BACKLOG 50 // Using the macro in the man example. Confused as to whether the length of backlog refers to the amount of request or 
-                   // length of request or length of packet
+#define PORT 60000 // For TCP any port between 49152-65535
+#define BACKLOG 2 
 
 char buffer[BUFFSIZE];
 
 int main() {
     int server_fd, client_fd; // Server File descriptor
-    struct sockaddr_un address; // address for local communication domain - required for binding file descriptor to port
+    //struct sockaddr_un address; // address for local communication domain - required for binding file descriptor to port
+    struct sockaddr_in address;
     int addrlen = sizeof(address);
-    if ((server_fd = socket(AF_LOCAL,SOCK_STREAM,0))<0)
+    if ((server_fd = socket(AF_INET,SOCK_STREAM,0))<0)
         exit(EXIT_FAILURE);
-    memset(&address, 0, addrlen); //From Linux man page, no idea why though
-    address.sun_family = AF_UNIX;
-    strncpy(address.sun_path, SOCK_PATH, sizeof(address.sun_path)-1); // Following the man again but have no idea why we are minusing from address size
+    memset(&address, 0, addrlen); 
+    address.sin_family = AF_INET;
+    address.sin_port = htons(PORT);
+    address.sin_addr.s_addr = htonl(INADDR_ANY);
+    //strncpy(address.sun_path, SOCK_PATH, sizeof(address.sun_path)-1);
     if (bind(server_fd,(struct sockaddr *)&address,addrlen)<0)
         exit(EXIT_FAILURE);
     if (listen(server_fd, BACKLOG)<0)
@@ -30,11 +35,12 @@ int main() {
     if(recv(client_fd, buffer, BUFFSIZE, 0)<0)
         exit(EXIT_FAILURE);
     printf("%s", buffer);
-    // Do not know what close or unlink here achieves and why we do it
+    if (close(client_fd) < 0)
+        exit(EXIT_FAILURE);
     if (close(server_fd)<0)
         exit(EXIT_FAILURE);
-    if (unlink(SOCK_PATH)<0)
-        exit(EXIT_FAILURE);
+    //if (unlink(SO`CK_PATH)<0)
+    //    exit(EXIT_FAILURE);
     return 0;
 }
 /* AF_LOCAL - Local Communication domain
