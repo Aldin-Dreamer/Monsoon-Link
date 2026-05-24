@@ -39,7 +39,7 @@ The reasoning for this packet structure is:
 - **hal.h —** Header file that acts as a hardware abstraction layer. This contains all the declaration of OS-dependent function and structure so that the code can be tested in linux and can be ported to other systems easily. The header file itself is OS-independent but the implementation can wary.
 - **linux-hal.c —** The Linux-specific implementation of the OS-dependent functions defined in hal.h
 - **device.c —** The main deliverable for this task. This is the final code that is run on the machine.
--**server.c —** This was a practice code to learn basic socket programming and function calls.
+- **server.c —** This was a practice code to learn basic socket programming and function calls.
 
 ## Acknowledgements
 - [Wikipedia Article for CRC](https://en.wikipedia.org/wiki/Cyclic_redundancy_check#Computation)
